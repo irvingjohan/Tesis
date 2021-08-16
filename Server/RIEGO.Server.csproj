@@ -24,5 +24,9 @@
     <ProjectReference Include="..\Shared\RIEGO.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
 
 </Project>
