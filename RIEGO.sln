@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RIEGO.Server", "Server\RIEGO.Server.csproj", "{E0A2F418-9564-4C55-AF4B-76F212F01478}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RIEGO.Client", "Client\RIEGO.Client.csproj", "{29B1913C-DF74-4F91-A210-B3A6BDC56DEC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RIEGO.Shared", "Shared\RIEGO.Shared.csproj", "{4DE5C36E-BABD-47C9-89ED-12F1B2C18FC8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E0A2F418-9564-4C55-AF4B-76F212F01478}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0A2F418-9564-4C55-AF4B-76F212F01478}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0A2F418-9564-4C55-AF4B-76F212F01478}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0A2F418-9564-4C55-AF4B-76F212F01478}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29B1913C-DF74-4F91-A210-B3A6BDC56DEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29B1913C-DF74-4F91-A210-B3A6BDC56DEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29B1913C-DF74-4F91-A210-B3A6BDC56DEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29B1913C-DF74-4F91-A210-B3A6BDC56DEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DE5C36E-BABD-47C9-89ED-12F1B2C18FC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DE5C36E-BABD-47C9-89ED-12F1B2C18FC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DE5C36E-BABD-47C9-89ED-12F1B2C18FC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DE5C36E-BABD-47C9-89ED-12F1B2C18FC8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9B116F17-D9F9-4575-B2E7-9A259C529D55}
+	EndGlobalSection
+EndGlobal
