@@ -1,17 +1,137 @@
-﻿@inherits LayoutComponentBase
+﻿@using Microsoft.AspNetCore.Components
+@using Radzen.Blazor
+@inherits LayoutComponentBase
+@inject NavigationManager UriHelper
+@inject IJSRuntime JSRuntime
+@*Login*@
+@attribute [Authorize]
+@inject CustomAuthenticationStateProvider Auth
+@inject HttpClient Http
+@*Login*@
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@inject HttpClient Client
+@inject NavigationManager navigationManager
+@*@inject NotificationService notificationService
+    @inject DialogService dialogService
+    @inject DialogService dialogServiceDesactivar*@
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<RadzenDialog />
+<RadzenNotification />
 
-    <div class="main">
-        <div class="top-row px-4">
-            <a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a>
+<div class="main">
+    <div class="header fixed">
+        <div>
+            <NavMenu IsAdmin="esAdmin" VerReportes="verReportes" />
         </div>
+        <div class="row justify-content-start align-items-center">
+            <div class="col-6 d-flex align-items-center"></div>
+            <div class="col-6 d-flex align-items-center justify-content-end">
+                <AuthorizeView>
+                    <Authorized>
 
-        <div class="content px-4">
+                        @try
+                        {
+                            <RadzenSplitButton Click=@(args => OnClick(args, "Sesion")) Text="@ValorClaimUser.ToUpper()" Style="margin-bottom: 20px;">
+                                <ChildContent>
+                                    <RadzenSplitButtonItem Text="Cerrar Sesión" Value="1" />
+                                </ChildContent>
+                            </RadzenSplitButton>
+
+                        }
+                        catch
+                        {
+                        }
+                    </Authorized>
+                    <NotAuthorized>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </div>
+    </div>
+    <div style="margin-left:260px;" class="body">
+        <div class="p-lg-5">
             @Body
         </div>
     </div>
 </div>
+
+@code
+{
+    string userName;
+    List<System.Security.Claims.Claim> claims;
+    string ValorClaimUser;
+    string ValorClaimEsAdmin;
+    string ValorClaimVerReportes;
+    bool esAdmin;
+    bool verReportes;
+
+    void OnClick(RadzenSplitButtonItem item, string buttonName)
+    {
+        if (item != null)
+        {
+            Console.WriteLine($"{buttonName}, item with value {item.Value} clicked");
+            logOutUser();
+        }
+        else
+        {
+            Console.WriteLine($"{buttonName} clicked");
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            ValorClaimUser = "";
+            ValorClaimEsAdmin = "";
+            ValorClaimVerReportes = ""; /***/
+            esAdmin = false;
+            //mainLayout = this;
+        }
+        else
+        {
+            var token = await Auth.GetTokenAsync();
+            if (!string.IsNullOrEmpty(token))
+            {
+                Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                var data = await Auth.GetAuthenticationStateAsync();
+                claims = data.User.Claims.ToList();
+                ValorClaimUser = claims[0].Value;
+                ValorClaimEsAdmin = claims[2].Value;
+
+                if (ValorClaimEsAdmin == "False") // si no es admin entonces si verificar el valor /***/
+                {
+                    if (claims[6].Value != null)
+                        ValorClaimVerReportes = claims[6].Value; /***/
+                    else
+                        ValorClaimVerReportes = "";  /***/
+                }
+                else
+                {
+                    esAdmin = true; /***/
+                    ValorClaimVerReportes = ""; // si es admin MVL este valor /***/
+                }
+
+                if (ValorClaimVerReportes == "True") /***/
+                    verReportes = true; /***/
+            }
+        }
+    }
+
+    async Task logOutUser()
+    {
+        var token = await Auth.GetTokenAsync();
+        if (!string.IsNullOrEmpty(token))
+        {
+            var response = await Client.GetAsync($"api/auth/logout?token={token}");
+            if (response.IsSuccessStatusCode)
+            {
+                esAdmin = false;
+                verReportes = false;
+                token = await response.Content.ReadAsStringAsync();
+                await Auth.SetTokenAsync(token, DateTime.Now.AddSeconds(-30).ToString());// cambio aqui para debugear
+                navigationManager.NavigateTo("/", true);
+            }
+        }
+    }
+}

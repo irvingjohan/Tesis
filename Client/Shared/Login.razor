@@ -1,0 +1,119 @@
+﻿@page "/login"
+@inject HttpClient Client
+@inject CustomAuthenticationStateProvider Auth
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@inject NavigationManager navigationManager
+@inject NotificationService notificationService
+
+<div>
+    <div class="col-md-6 col-xl-4">
+        <RadzenCard>
+            <br />
+            <div>
+                <label>Usuario</label><br />
+                <RadzenTextBox Placeholder="Usuario..." @bind-Value="user" />
+            </div>
+            <br />
+            <div>
+                <label>Contraseña</label><br />
+                <RadzenPassword Placeholder="Password..." @bind-Value="pass" @onkeydown="KeyboardEventHandler " @onkeypress=" KeyboardEventHandler " @onkeyup="KeyboardEventHandler " />
+            </div>
+            <br />
+            <div>
+                <RadzenButton Click=@(() => LoginUser()) Text="Login" Style="margin-bottom: 20px; width: 150px" />
+            </div>
+        </RadzenCard>
+    </div>
+</div>
+
+@code
+{
+    string user = "";
+    string pass = "";
+    string encryptedPassword;
+    List<System.Security.Claims.Claim> claims;
+    BlazorCoockies blazorCoockies = new BlazorCoockies();
+
+    string ValorClaimUser;
+    string ValorClaimEsAdmin;
+    string ValorClaimIdEmpresa;
+    string ValorClaimIdSucursal;
+    string ValorClaimVerReportes;/***/
+
+    string KeyPressed = "";
+    string EventInfo = "";
+    public enum TipoMensaje { None, Exito, Error, Info };
+    TipoMensaje tipoMensaje;
+
+    private void KeyboardEventHandler(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter" && pass != "")
+        {
+            LoginUser().ConfigureAwait(true);
+        }
+    }
+    async Task LoginUser()
+    {
+        user = user.Trim();
+        pass = pass.Trim();
+
+        try
+        {
+            var response = await Client.GetAsync($"api/auth/login?user={user}&pass={pass}");
+            if (response.IsSuccessStatusCode)
+            {
+                var token = await response.Content.ReadAsStringAsync();
+                await Auth.SetTokenAsync(token, DateTime.Now.AddSeconds(28800).ToString());// cambio aqui para debugear
+                var data = await Auth.GetAuthenticationStateAsync();
+                claims = data.User.Claims.ToList();
+                ValorClaimUser = claims[0].Value;
+                ValorClaimEsAdmin = claims[2].Value;
+                ValorClaimIdEmpresa = claims[3].Value;
+                ValorClaimIdSucursal = claims[4].Value;
+
+                if (ValorClaimEsAdmin == "False") // si no es admin entonces si verificar el valor /***/
+                {
+                    if (claims[6].Value != null)
+                        ValorClaimVerReportes = claims[6].Value; /***/
+                    else
+                        ValorClaimVerReportes = "";  /***/
+                }
+                else
+                    ValorClaimVerReportes = ""; // si es admin MVL este valor /***/
+
+                blazorCoockies.UserName = ValorClaimUser;
+                blazorCoockies.EsAdmin = ValorClaimEsAdmin;
+                blazorCoockies.IDUserEmpresa = ValorClaimIdEmpresa;
+                blazorCoockies.IDUserSucursal = ValorClaimIdSucursal;
+                blazorCoockies.VerReportes = ValorClaimVerReportes;
+                StateHasChanged();
+                navigationManager.NavigateTo("/");
+            }
+        }
+        catch (Exception ee)
+        {
+            ShowNotification(TipoMensaje.Info);
+        }
+    }
+
+    void ShowNotification(TipoMensaje tipoMensaje)
+    {
+        switch (tipoMensaje)
+        {
+            case TipoMensaje.Exito: // exito
+                                    //ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success Summary", Detail = "Exito al Eliminar Registro", Duration = 2000 });
+                break;
+            case TipoMensaje.Error://error
+                                   //ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Error, Summary = "Error Summary", Detail = "Error al borrar registro", Duration = 2000 });
+                break;
+            case TipoMensaje.Info://info
+                ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Info, Summary = "Info", Detail = "El usuario Y/O contraseña no son correctos \n o bien no tiene permisos asignados", Duration = 3000 });
+                break;
+        }
+    }
+
+    async Task ShowNotification(NotificationMessage message)
+    {
+        notificationService.Notify(message);
+    }
+}
