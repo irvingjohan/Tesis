@@ -1,6 +1,216 @@
 ﻿@page "/"
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@inject IRepositorio repositorio
+@inject NavigationManager navigationManager
+@*Login*@
+@attribute [Authorize]
+@inject CustomAuthenticationStateProvider Auth
+@inject HttpClient Http
+@*Login*@
 
-<h1>Hello, world!</h1>
+@if (BlazorCoockies.isLoggedIn)
+{
+    //Reload();
+    Cargar().GetAwaiter();
+}
+else
+{
+    if (!_esAdmin && !_crear && !_borrar && !_editar)
+    {
+        <h1> @cargando </h1>
+        //_esAdmin = true;
+        Reload();
+    }
+    else if (_esAdmin || _crear || _borrar || _editar)
+    {
+        <AuthorizeView>
+            <Authorized>
+                <h1> @cargando </h1>
+                <h3> HOLA @ValorClaimUser.ToUpper() BIENVENIDO A Riego Zapo </h3>
+                @if (_esAdmin)
+                {        
+                }
+            </Authorized>
+        </AuthorizeView>
+    }
+}
 
-Welcome to your new app.
+@code
+ {
+    private Usuario usuario = new Usuario();
+    BlazorCoockies blazorCoockies = new BlazorCoockies();
+    bool _esAdmin;
+    bool _crear;
+    bool _editar;
+    bool _borrar;
+    int _idEmpresa;
+    int _idSucursal;
+    string cargando = "Cargando...";
+    bool entroElPito;
+    string IdEmpresa;
+    string IdSucursal;
+    string userName;
+    List<System.Security.Claims.Claim> claims;
+    string ValorClaimUser;
+    string ValorClaimEsAdmin;
+    string ValorClaimIdEmpresa;
+    string ValorClaimIdSucursal;
+    string ValorClaimVer;
+    string ValorClaimCrear;
+    string ValorClaimEditar;
+    string ValorClaimBorrar;
+    string ValorClaimVerUsuarios;
+    string ValorClaimCrearUsuarios;
+    string ValorClaimEditarUsuarios;
+    string ValorClaimBorrarUsuarios;
+    string ValorClaimPermiso;
+    string ValorClaimVerReportes;/***/
+    List<Permisos> currentPermisos;
 
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await Auth.GetTokenAsync();
+        if (!string.IsNullOrEmpty(token))
+        {
+            await blazorCoockies.CoockieSetter(sessionStorage, ValorClaimUser, "Nada", ValorClaimIdEmpresa, ValorClaimIdSucursal, ValorClaimVerReportes).ContinueWith(t => StateHasChanged());
+            Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var data = await Auth.GetAuthenticationStateAsync();
+            claims = data.User.Claims.ToList();
+            ValorClaimUser = claims[0].Value;
+            ValorClaimEsAdmin = claims[2].Value;
+            ValorClaimIdEmpresa = claims[3].Value;
+            ValorClaimIdSucursal = claims[4].Value;
+
+            if (ValorClaimEsAdmin == "False") // si no es admin entonces si verificar el valor /***/
+            {
+                if (claims[6].Value != null)
+                    ValorClaimVerReportes = claims[6].Value; /***/
+                else
+                    ValorClaimVerReportes = "";  /***/
+            }
+            else
+                ValorClaimVerReportes = ""; // si es admin MVL este valor /***/
+
+            foreach (var item in claims)
+            {
+                if (item.Value == "Ver")
+                {
+                    ValorClaimVer = "Ver";
+                    ValorClaimPermiso = ValorClaimVer;
+                }
+
+                if (item.Value == "Crear")
+                {
+                    ValorClaimCrear = "Crear";
+                    ValorClaimPermiso = ValorClaimCrear;
+                }
+
+                if (item.Value == "Editar")
+                {
+                    ValorClaimEditar = "Editar";
+                    ValorClaimPermiso = ValorClaimEditar;
+                }
+
+                if (item.Value == "Borrar")
+                {
+                    ValorClaimBorrar = "Borrar";
+                    ValorClaimPermiso = ValorClaimBorrar;
+                }
+
+                if (item.Value == "VerUsuarios")
+                {
+                    ValorClaimVerUsuarios = "VerUsuarios";
+                    ValorClaimPermiso = ValorClaimVerUsuarios;
+                }
+
+                if (item.Value == "CrearUsuarios")
+                {
+                    ValorClaimCrearUsuarios = "CrearUsuarios";
+                    ValorClaimPermiso = ValorClaimCrearUsuarios;
+                }
+
+                if (item.Value == "EditarUsuarios")
+                {
+                    ValorClaimEditarUsuarios = "EditarUsuarios";
+                    ValorClaimPermiso = ValorClaimEditarUsuarios;
+                }
+
+                if (item.Value == "BorrarUsuarios")
+                {
+                    ValorClaimBorrarUsuarios = "BorrarUsuarios";
+                    ValorClaimPermiso = ValorClaimBorrarUsuarios;
+                }
+            }
+
+            if (blazorCoockies.IDUserEmpresa == null && blazorCoockies.IDUserSucursal == null && blazorCoockies.UserName == null)
+            {
+                if (ValorClaimEsAdmin == "True")
+                {
+                    _esAdmin = true;
+                    await blazorCoockies.CoockieSetter(sessionStorage, ValorClaimUser, "Admin", ValorClaimIdEmpresa, ValorClaimIdSucursal, ValorClaimVerReportes).ContinueWith(t => StateHasChanged()); /***/
+                }
+                else
+                {
+                    _esAdmin = false;
+                    _crear = false;
+                    _editar = true;
+                    _borrar = true;
+
+                    if (ValorClaimPermiso != null)
+                    {
+                        var httpResponce3 = await repositorio.Get<List<Usuario>>("api/Usuario");
+                        var usuariox = httpResponce3.Response;
+                        if (!_esAdmin)
+                        {
+                            var currentUser = usuariox.Where(x => x.UserName == ValorClaimUser && x.Activo == true).FirstOrDefault();
+                            var httpResponce4 = await repositorio.Get<List<Permisos>>("api/Permiso");
+                            var Permisosx = httpResponce4.Response;
+
+                            currentPermisos = Permisosx.Where(x => x.IdRol == currentUser.IdRol && x.Activo == true).ToList();
+                        }
+                        await blazorCoockies.CoockieSetter(sessionStorage, ValorClaimUser, "" /*ValorClaimPermiso*/, ValorClaimIdEmpresa, ValorClaimIdSucursal, ValorClaimVerReportes, currentPermisos).ContinueWith(t => StateHasChanged()); /***/
+                    }
+                    else
+                    {
+                        await blazorCoockies.CoockieSetter(sessionStorage, ValorClaimUser, "Nada", ValorClaimIdEmpresa, ValorClaimIdSucursal, ValorClaimVerReportes).ContinueWith(t => StateHasChanged()); /***/
+                    }
+                }
+
+                await blazorCoockies.CoockieGetter(sessionStorage).ConfigureAwait(true);
+                await Cargar();
+            }
+            else
+            {
+                if (blazorCoockies.EsAdmin != null)
+                {
+                    _esAdmin = Boolean.Parse(blazorCoockies.EsAdmin.ToString());
+                    _crear = Boolean.Parse(blazorCoockies.Crear.ToString());
+                    _editar = Boolean.Parse(blazorCoockies.Editar.ToString());
+                    _borrar = Boolean.Parse(blazorCoockies.Borrar.ToString());
+                    _idEmpresa = int.Parse(blazorCoockies.IDUserEmpresa);
+                    _idSucursal = int.Parse(blazorCoockies.IDUserSucursal);
+                }
+                await Cargar();
+            }
+        }
+        StateHasChanged();
+    }
+
+    void Reload()
+    {
+        navigationManager.NavigateTo("/");
+    }
+
+    private async Task Cargar()
+    {
+        if (_esAdmin)
+        {
+           
+        }   
+    }
+
+    private async Task Crear()
+    {
+        BlazorCoockies.isLoggedIn = true;
+    }
+}

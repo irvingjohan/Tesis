@@ -8,70 +8,28 @@
 @*https://material.io/resources/icons/?style=baseline*@
 <div style="width:310px;transform:translateX(0px);" class="rz-sidebar">
     <RadzenPanelMenu Style="width:300px">
-        <NavLink class="nav-link" href="" Match="NavLinkMatch.All"><RadzenPanelMenuItem Text="Flotillaz" Icon="home" /></NavLink>
-        <RadzenPanelMenuItem Text="Combustibles" Icon="local_gas_station">
-            @if (IsAdmin)
-            {
-                <RadzenPanelMenuItem Text="Combustible Tipo" Path="CombustibleTipo" Icon="local_gas_station"></RadzenPanelMenuItem>
-            }
-            <RadzenPanelMenuItem Text="Carga Combustible" Path="CargaCombustible" Icon="local_gas_station"></RadzenPanelMenuItem>
-            <RadzenPanelMenuItem Text="Odómetro" Path="Odometro" Icon="local_gas_station"></RadzenPanelMenuItem>
-        </RadzenPanelMenuItem>
-        <RadzenPanelMenuItem Text="Conductor/Vehículo" Icon="directions_car">
-            <RadzenPanelMenuItem Text="Conductor" Path="Conductor" Icon="directions_car"></RadzenPanelMenuItem>
-            <RadzenPanelMenuItem Text="Vehículo" Path="Vehiculo" Icon="directions_car"></RadzenPanelMenuItem>
-            @if (IsAdmin)
-            {
-                <RadzenPanelMenuItem Text="Vehículo Estatus" Path="VehiculoEstatus" Icon="directions_car"></RadzenPanelMenuItem>
-                <RadzenPanelMenuItem Text="Vehículo Tipo" Path="VehiculoTipo" Icon="directions_car"></RadzenPanelMenuItem>
-            }
-        </RadzenPanelMenuItem>
-        @if (IsAdmin)
+        <NavLink class="nav-link" href="" Match="NavLinkMatch.All"><RadzenPanelMenuItem Text="RIEGO ZAPO" Icon="home" /></NavLink>
+        <RadzenPanelMenuItem Text="Catalogos/Riego" Icon="local_gas_station">
+            @*@if (IsAdmin)
         {
-            <RadzenPanelMenuItem Text="Empresa/Sucursal" Icon="domain">
-                <RadzenPanelMenuItem Text="Empresas" Path="Empresa" Icon="domain"></RadzenPanelMenuItem>
-                <RadzenPanelMenuItem Text="Sucursales" Path="Sucursal" Icon="domain"></RadzenPanelMenuItem>
-            </RadzenPanelMenuItem>
-        }
-        <RadzenPanelMenuItem Text="Infracciones" Icon="list_alt">
-            @if (IsAdmin)
-            {
-                <RadzenPanelMenuItem Text="Infracción Estatus" Path="InfraccionEstatus" Icon="list_alt"></RadzenPanelMenuItem>
-            }
-            <RadzenPanelMenuItem Text="Infracción" Path="Infraccion" Icon="list_alt"></RadzenPanelMenuItem>
+            <RadzenPanelMenuItem Text="Combustible Tipo" Path="CombustibleTipo" Icon="local_gas_station"></RadzenPanelMenuItem>
+        }*@
+            <RadzenPanelMenuItem Text="Llaves" Path="Llave" Icon="local_gas_station"></RadzenPanelMenuItem>
+            <RadzenPanelMenuItem Text="Secciones" Path="Seccion" Icon="local_gas_station"></RadzenPanelMenuItem>
+            <RadzenPanelMenuItem Text="Horarios" Path="Horario" Icon="local_gas_station"></RadzenPanelMenuItem>
+            <RadzenPanelMenuItem Text="Riegos" Path="Riego" Icon="local_gas_station"></RadzenPanelMenuItem>
         </RadzenPanelMenuItem>
-        <RadzenPanelMenuItem Text="Mantenimientos" Icon="build">
-            <RadzenPanelMenuItem Text="Mantenimiento" Path="Mantenimiento" Icon="build"></RadzenPanelMenuItem>
-            @if (IsAdmin)
-            {
-                <RadzenPanelMenuItem Text="Conceptos Mantenimientos" Path="MantenimientoConcepto" Icon="build"></RadzenPanelMenuItem>
-            }
-        </RadzenPanelMenuItem>
-        <RadzenPanelMenuItem Text="Pólizas" Icon="lock">
-            <RadzenPanelMenuItem Text="Pólizas" Path="Poliza" Icon="lock"></RadzenPanelMenuItem>
-            @if (IsAdmin)
-            {
-                <RadzenPanelMenuItem Text="Tipo Pólizas" Path="PolizaTipo" Icon="lock"></RadzenPanelMenuItem>
-            }
-        </RadzenPanelMenuItem>
-        <RadzenPanelMenuItem Text="Proveedores" Icon="contacts">
-            <RadzenPanelMenuItem Text="Proveedores" Path="Proveedor" Icon="contacts"></RadzenPanelMenuItem>
-            @*<RadzenPanelMenuItem Text="Tipo Proveedores" Path="ProveedorTipo" Icon="contacts"></RadzenPanelMenuItem>*@ @*// por seguridad se mando ALV*@
-        </RadzenPanelMenuItem>
-        <RadzenPanelMenuItem Text="Trámites" Icon="ballot">
-            <RadzenPanelMenuItem Text="Trámites Vehiculares" Path="TramiteVehicular" Icon="ballot"></RadzenPanelMenuItem>
-            @if (IsAdmin)
-            {
-                <RadzenPanelMenuItem Text="Tipo Trámites " Path="TramiteTipo" Icon="ballot"></RadzenPanelMenuItem>
-            }
-        </RadzenPanelMenuItem>
-        @if (IsAdmin || VerReportes)
+
+        @if (IsAdmin)
         {
             <RadzenPanelMenuItem Text="Usuarios" Icon="directions_run">
                 <RadzenPanelMenuItem Text="Usuarios" Path="Usuario" Icon="directions_run"></RadzenPanelMenuItem>
                 <RadzenPanelMenuItem Text="Permisos" Path="Permisos" Icon="directions_run"></RadzenPanelMenuItem>
                 <RadzenPanelMenuItem Text="Roles" Path="Rol" Icon="directions_run"></RadzenPanelMenuItem>
             </RadzenPanelMenuItem>
+        }
+        @if (IsAdmin || VerReportes)
+        {
             <RadzenPanelMenuItem Text="Reportes" Icon="article">
                 @*<RadzenPanelMenuItem Text="Reportes" Path="https://10.10.10.108:8080/" Icon="article"></RadzenPanelMenuItem>*@
                 <RadzenPanelMenuItem Text="Reportes" Path="http://10.10.10.108:8080/" Icon="article"></RadzenPanelMenuItem>

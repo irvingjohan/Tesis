@@ -1,0 +1,217 @@
+﻿@inject IRepositorio repositorio
+
+<EditForm Model="Usuario" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-group">
+        <div>
+            <label><strong style="color:red">*</strong> Indica un campo obligatorio</label>
+        </div>
+        @*<label>Empresa: <strong style="color:red">*</strong> </label>
+        <div>
+            @if (EsAdmin)
+            {
+                @if (SoloActivos)
+                {
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Data="@EmpresaNoSeleccionada.Where(x => x.Activo == true)" @bind-Value="Usuario.IdEmpresa" TextProperty="Nombre" ValueProperty="Id" Style="margin-bottom: 20px; width:400px;" Change="@(args => ChangeBoundEmpresa(args, "DropDown with bound Value"))" />
+                }
+                else
+                {
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Data="@EmpresaNoSeleccionada" @bind-Value="Usuario.IdEmpresa" TextProperty="Nombre" ValueProperty="Id" Style="margin-bottom: 20px; width:400px;" Change="@(args => ChangeBoundEmpresa(args, "DropDown with bound Value"))" />
+                }
+            }
+            else
+            {
+                @if (SoloActivos)
+                {
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Data="@EmpresaNoSeleccionada.Where(x => x.Activo == true && x.Id == IdEmpresa)" @bind-Value="Usuario.IdEmpresa" TextProperty="Nombre" ValueProperty="Id" Style="margin-bottom: 20px; width:400px;" Change="@(args => ChangeBoundEmpresa(args, "DropDown with bound Value"))" />
+                }
+                else
+                {
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Data="@EmpresaNoSeleccionada.Where(x => x.Id == IdEmpresa)" @bind-Value="Usuario.IdEmpresa" TextProperty="Nombre" ValueProperty="Id" Style="margin-bottom: 20px; width:400px;" Change="@(args => ChangeBoundEmpresa(args, "DropDown with bound Value"))" />
+                }
+
+            }
+            <ValidationMessage For="@(() =>Usuario.IdEmpresa)" />
+        </div>*@
+
+        @*<label>Sucursal: <strong style="color:red">*</strong> </label>
+        <div>
+            @if (EsAdmin)
+            {
+                @if (SoloActivos)
+                {
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Data="@SucursalNoSeleccionada.Where(x => x.Activo == true && x.IdEmpresa == Usuario.IdEmpresa)" @bind-Value="Usuario.IdSucursal" TextProperty="Nombre" ValueProperty="Id" Style="margin-bottom: 20px; width:400px;" Change="@(args => ChangeBoundSucursal(args, "DropDown with bound Value"))" />
+                }
+                else
+                {
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Data="@SucursalNoSeleccionada.Where(x => x.IdEmpresa == Usuario.IdEmpresa)" @bind-Value="Usuario.IdSucursal" TextProperty="Nombre" ValueProperty="Id" Style="margin-bottom: 20px; width:400px;" Change="@(args => ChangeBoundSucursal(args, "DropDown with bound Value"))" />
+                }
+            }
+            else
+            {
+                @if (SoloActivos)
+                {
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Data="@SucursalNoSeleccionada.Where(x => x.Activo == true && x.IdEmpresa == IdEmpresa && x.Id == IdSucursal)" @bind-Value="Usuario.IdSucursal" TextProperty="Nombre" ValueProperty="Id" Style="margin-bottom: 20px; width:400px;" Change="@(args => ChangeBoundSucursal(args, "DropDown with bound Value"))" />
+                }
+                else
+                {
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Data="@SucursalNoSeleccionada.Where(x => x.IdEmpresa == IdEmpresa && x.Id == IdSucursal)" @bind-Value="Usuario.IdSucursal" TextProperty="Nombre" ValueProperty="Id" Style="margin-bottom: 20px; width:400px;" Change="@(args => ChangeBoundSucursal(args, "DropDown with bound Value"))" />
+                }
+            }
+            <ValidationMessage For="@(() =>Usuario.IdSucursal)" />
+        </div>*@
+
+        <label>User Name: <strong style="color:red">*</strong> </label>
+        <div>
+            <InputText class="form-control" @bind-Value="@Usuario.UserName" maxlength="25" placeholder="Usuario" />
+            <ValidationMessage For="@(() => Usuario.UserName)" />
+        </div>
+
+        <label>Password: <strong style="color:red">*</strong> </label>
+        <div>
+            <InputText class="form-control" @bind-Value="@Usuario.Password" type="password" maxlength="25" placeholder="Password" />
+            <ValidationMessage For="@(() => Usuario.Password)" />
+        </div>
+
+        <label>Es Admin:</label>
+        <div>
+            <RadzenSwitch @bind-Value="@Usuario.EsAdmin" Style="margin-bottom: 20px" />
+            <ValidationMessage For="@(() => Usuario.EsAdmin)" />
+        </div>
+
+        @if (!Usuario.EsAdmin)
+        {
+            <label>Rol: <strong style="color:red">*</strong> </label>
+            <div>
+                <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Data="@RolesNoSeleccionada.Where(x => x.Activo == true)" @bind-Value="Usuario.IdRol" TextProperty="Descripcion" ValueProperty="Id" Style="margin-bottom: 20px; width:400px;" Change="@(args => ChangeBoundRol(args, "DropDown with bound Value"))" />
+                <ValidationMessage For="@(() => Usuario.IdRol)" />
+            </div>
+        }
+
+        <label>Nombres:</label>
+        <div>
+            <InputText class="form-control" @bind-Value="@Usuario.Nombres" maxlength="75" oninput="this.value = this.value.toUpperCase()" />
+            <ValidationMessage For="@(() => Usuario.Nombres)" />
+        </div>
+
+        <label>Apellido Paterno:</label>
+        <div>
+            <InputText class="form-control" @bind-Value="@Usuario.ApellidoPaterno" maxlength="50" oninput="this.value = this.value.toUpperCase()" />
+            <ValidationMessage For="@(() => Usuario.ApellidoPaterno)" />
+        </div>
+
+        <label>Apellido Materno:</label>
+        <div>
+            <InputText class="form-control" @bind-Value="@Usuario.apellidoMaterno" maxlength="50" oninput="this.value = this.value.toUpperCase()" />
+            <ValidationMessage For="@(() => Usuario.apellidoMaterno)" />
+        </div>
+
+
+
+        <label>Activo:</label>
+        <div>
+            @if (IsCreatingPage)
+            {
+                <RadzenSwitch @bind-Value="@Usuario.Activo" Style="margin-bottom: 20px" Disabled="true" />
+                <ValidationMessage For="@(() => Usuario.Activo)" />
+            }
+            else
+            {
+                <RadzenSwitch @bind-Value="@Usuario.Activo" Style="margin-bottom: 20px" />
+                <ValidationMessage For="@(() => Usuario.Activo)" />
+            }
+        </div>
+    </div>
+    @if (!Usuario.EsAdmin)
+    {
+        @if (IsCreatingPage && Usuario.IdRol > 0 && (Usuario.UserName != "" && Usuario.UserName != null) && (Usuario.Password != "" && Usuario.Password != null))
+        {
+            <button class="btn btn-success" type="submit">Guardar Cambios</button>
+        }
+        else if (!IsCreatingPage && Usuario.IdRol > 0 && (Usuario.UserName != "" && Usuario.UserName != null) && (Usuario.Password != "" && Usuario.Password != null))
+        {
+            <button class="btn btn-success" type="submit">Guardar Cambios</button>
+        }
+        else
+        {
+            <button class="btn btn-success" type="submit" disabled>Guardar Cambios</button>
+        }
+    }
+    else if (Usuario.EsAdmin) // no importa el rol
+    {
+        Usuario.IdRol = 0;
+        @if (IsCreatingPage && (Usuario.UserName != "" && Usuario.UserName != null) && (Usuario.Password != "" && Usuario.Password != null))
+        {
+            <button class="btn btn-success" type="submit">Guardar Cambios</button>
+        }
+        else if (!IsCreatingPage && (Usuario.UserName != "" && Usuario.UserName != null) && (Usuario.Password != "" && Usuario.Password != null))
+        {
+            <button class="btn btn-success" type="submit">Guardar Cambios</button>
+        }
+        else
+        {
+            <button class="btn btn-success" type="submit" disabled>Guardar Cambios</button>
+        }
+    }
+</EditForm>
+@code
+{
+    //private List<Empresa> EmpresaNoSeleccionada = new List<Empresa>();
+    //private List<Sucursal> SucursalNoSeleccionada = new List<Sucursal>();
+    private List<Roles> RolesNoSeleccionada = new List<Roles>();
+    [Parameter] public Usuario Usuario { get; set; }
+    //[Parameter] public Empresa Empresa { get; set; }
+    //[Parameter] public Sucursal Sucursal { get; set; }
+    [Parameter] public Roles Roles { get; set; }
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public bool IsCreatingPage { get; set; }
+    [Parameter] public int IdEmpresa { get; set; }
+    [Parameter] public int IdSucursal { get; set; }
+    [Parameter] public bool EsAdmin { get; set; }
+    int IdRol;
+    public bool SoloActivos = true;
+
+    protected async override Task OnInitializedAsync()
+    {
+        //var responseHttp = await repositorio.Get<List<Empresa>>("api/Empresa");
+        //EmpresaNoSeleccionada = responseHttp.Response;
+
+        //var responseHttp2 = await repositorio.Get<List<Sucursal>>("api/Sucursal");
+        //SucursalNoSeleccionada = responseHttp2.Response;
+
+        var responseHttp3 = await repositorio.Get<List<Roles>>("api/Roles");
+        RolesNoSeleccionada = responseHttp3.Response;
+
+        ChangeBoundEmpresa(null, "");
+        ChangeBoundSucursal(null, "");
+        ChangeBoundRol(null, "");
+    }
+
+    protected override void OnParametersSet()
+    {
+        var isCreatingPage = IsCreatingPage;
+
+        if (isCreatingPage)
+        {
+            Usuario.Activo = true;
+        }
+    }
+
+    void ChangeBoundEmpresa(object value, string name)
+    {
+        if (Usuario.Id > 0)
+            IdEmpresa = Usuario.IdEmpresa;
+        StateHasChanged();
+    }
+    void ChangeBoundSucursal(object value, string name)
+    {
+        if (Usuario.Id > 0)
+            IdSucursal = Usuario.IdSucursal;
+        StateHasChanged();
+    }
+    void ChangeBoundRol(object value, string name)
+    {
+        IdRol = Usuario.IdSucursal;
+        StateHasChanged();
+    }
+}

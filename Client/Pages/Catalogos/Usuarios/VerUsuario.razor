@@ -1,0 +1,260 @@
+﻿@page "/Usuario"
+@inject IRepositorio repositorio
+@inject NavigationManager navigationManager
+@inject DialogService dialogService
+@*@implements IDisposable*@
+@inject NotificationService notificationService
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@*Login*@
+@attribute [Authorize]
+@inject CustomAuthenticationStateProvider Auth
+@inject HttpClient Http
+@*Login*@
+
+<AuthorizeView>
+    <Authorized>
+        <h3>Catálogo de Usuarios</h3>
+        @if (usuario == null)
+        {
+            if (!_esAdmin || !_crearUsuarios || !_borrarUsuarios || !_editarUsuarios || !_verUsuarios)
+            {
+                <text>No tiene permisos suficientes para estar aquí...</text>
+            }
+        }
+        else
+        {
+            if (_esAdmin || _crearUsuarios || _borrarUsuarios || _editarUsuarios || _verUsuarios)
+            {
+                if (_esAdmin || _crearUsuarios || _borrarUsuarios || _editarUsuarios)
+                {
+                    <div class="form-group">
+                        <a class="btn btn-info" href="/Usuario/Crear">Agregar Usuario</a>
+                    </div>
+                }
+
+                <RadzenGrid AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowPaging="true" PageSize="20"
+                            AllowSorting="true" Data="@usuario" TItem="Usuario" ColumnWidth="200px">
+                    <Columns>
+                        <RadzenGridColumn TItem="Usuario" Property="Id" Title="Id">
+                            <Template Context="data">
+                                @if (_esAdmin || _editarUsuarios)
+                                {
+                                    <a href="/Usuario/Editar/@data?.Id">@data?.Id</a>
+                                }
+                                else
+                                {
+                                    @data?.Id
+                                }
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="Usuario" Property="UserName" Title="User Name" />
+                        <RadzenGridColumn TItem="Usuario" Property="EsAdmin" Title="Admin">
+                            <Template Context="data">
+                                @if (@data.EsAdmin)
+                                {
+                                    <label>SI</label>
+
+                                }
+                                else
+                                {
+                                    <label>NO</label>
+                                }
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="Usuario" Property="IdRol" Title="Rol">
+                            <Template Context="data">
+                                @roles.Where(x => x.Id == @data?.IdRol).Select(x => x.Descripcion).FirstOrDefault()
+                            </Template>
+                        </RadzenGridColumn>
+                        @*<RadzenGridColumn TItem="Usuario" Property="IdEmpresa" Title="Empresa">
+                            <Template Context="data">
+                                @empresa.Where(x => x.Id == @data?.IdEmpresa).Select(x => x.Nombre).FirstOrDefault()
+                            </Template>
+                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="Usuario" Property="IdSucursal" Title="Sucursal">
+                            <Template Context="data">
+                                @sucursal.Where(x => x.Id == @data?.IdSucursal).Select(x => x.Nombre).FirstOrDefault()
+                            </Template>
+                        </RadzenGridColumn>*@
+                        <RadzenGridColumn TItem="Usuario" Property="Nombres" Title="Nombre" />
+                        <RadzenGridColumn TItem="Usuario" Property="ApellidoPaterno" Title="Apellido Paterno" />
+                        <RadzenGridColumn TItem="Usuario" Property="apellidoMaterno" Title="apellido Materno" />
+                        <RadzenGridColumn TItem="Usuario" Property="Activo" Title="Activo">
+                            <Template Context="data">
+                                @if (@data.Activo)
+                                {
+                                    <label>SI</label>
+
+                                }
+                                else
+                                {
+                                    <label>NO</label>
+                                }
+                            </Template>
+                        </RadzenGridColumn>
+                        @if (_esAdmin || _borrarUsuarios)
+                        {
+                            <RadzenGridColumn TItem="Usuario" Property="" Title="Borrar">
+                                <Template Context="data">
+                                    <RadzenButton Click="@(() => BorrarID(data?.Id))" Icon="delete" Style="margin-bottom: 20px; width: 80px" />
+                                </Template>
+                            </RadzenGridColumn>
+                        }
+                    </Columns>
+                </RadzenGrid>
+            }
+            else
+            {
+                <text> No tiene permisos suficientes para estar aquí...</text>
+            }
+        }
+    </Authorized>
+    <NotAuthorized>
+        <text> No tiene permisos suficientes para estar aquí...</text>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code
+{
+    IEnumerable<Usuario> usuario;
+    IEnumerable<Roles> roles;
+    //IEnumerable<Empresa> empresa;
+    //IEnumerable<Sucursal> sucursal;
+    int? id;
+    public enum TipoMensaje { None, Exito, Error, Info };
+    TipoMensaje tipoMensaje;
+    BlazorCoockies blazorCoockies = new BlazorCoockies();
+    bool _esAdmin;
+    bool _verUsuarios;
+    bool _crearUsuarios;
+    bool _editarUsuarios;
+    bool _borrarUsuarios;
+    int _idEmpresa;
+    int _idSucursal;
+
+    public void Dispose()
+    {
+        dialogService.OnOpen -= Open;
+        dialogService.OnClose -= Close;
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        dialogService.Dispose();
+        var token = await Auth.GetTokenAsync();
+        if (!string.IsNullOrEmpty(token))
+        {
+            Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            await blazorCoockies.CoockieGetter(sessionStorage);
+            await Cargar();
+            _esAdmin = Boolean.Parse(blazorCoockies.EsAdmin.ToString());
+            _verUsuarios = Boolean.Parse(blazorCoockies.VerUsuarios.ToString());
+            _crearUsuarios = Boolean.Parse(blazorCoockies.CrearUsuarios.ToString());
+            _editarUsuarios = Boolean.Parse(blazorCoockies.EditarUsuarios.ToString());
+            _borrarUsuarios = Boolean.Parse(blazorCoockies.BorrarUsuarios.ToString());
+            _idEmpresa = int.Parse(blazorCoockies.IDUserEmpresa);
+            _idSucursal = int.Parse(blazorCoockies.IDUserSucursal);
+            dialogService.OnOpen += Open;
+            dialogService.OnClose += Close;
+        }
+    }
+
+    private async Task Cargar()
+    {
+        try
+        {
+            var httpResponse = await repositorio.Get<List<Usuario>>("api/Usuario");
+            usuario = httpResponse.Response;
+            var httpResponse5 = await repositorio.Get<List<Roles>>("api/Roles");
+            roles = httpResponse5.Response;
+            //var responseHttp6 = await repositorio.Get<List<Empresa>>("api/Empresa");
+            //empresa = responseHttp6.Response;
+            //var responseHttp7 = await repositorio.Get<List<Sucursal>>("api/Sucursal");
+            //sucursal = responseHttp7.Response;
+        }
+        catch
+        {
+            usuario = null;
+            roles = null;
+            //empresa = null;
+            //sucursal = null;
+        }
+    }
+
+    async Task Borrar(Usuario usuario)
+    {
+        var responseHttp = await repositorio.Delete($"api/Usuario/{usuario.Id}");
+        if (responseHttp.Error)
+        {
+            ShowNotification(TipoMensaje.Error);
+        }
+        else
+        {
+            await Cargar();
+            ShowNotification(TipoMensaje.Exito);
+        }
+    }
+
+    void BorrarID(int? _id)
+    {
+        id = _id;
+        dialogService.Confirm("Estas seguro de querer borrar el id " + _id.ToString() + " ? ", "Aviso ", new ConfirmOptions() { OkButtonText = "Si", CancelButtonText = "No" });
+    }
+
+    void Open(string title, Type type, Dictionary<string, object> parameters, DialogOptions options)
+    {
+        StateHasChanged();
+    }
+
+    void Close(dynamic result)
+    {
+        if (result && id.HasValue)
+        {
+            RunSync();
+        }
+        else
+        {
+            ShowNotification(TipoMensaje.Info);
+            StateHasChanged();
+        }
+    }
+
+    private void RunSync()
+    {
+        Task.Run(async () => await Borrar(usuario.Where(x => x.Id == id).FirstOrDefault())).ContinueWith(t => this.StateHasChanged()); ;
+    }
+
+    async Task ShowSimpleDialog() => await dialogService.OpenAsync("Simple Dialog", ds =>
+    @<RadzenCard Style="padding: 20px;">
+        <p Style="margin-bottom: 10px;">Confirm?</p>
+        <div class="row">
+            <div class="col-md-12">
+                <RadzenButton Text="Ok" Click="() =>  ds.Close(true)" Style="margin-bottom: 10px; width: 150px" />
+                <RadzenButton Text="Cancel" Click="()=> ds.Close(false)" ButtonStyle="ButtonStyle.Secondary" Style="margin-bottom: 10px; width: 150px" />
+            </div>
+        </div>
+    </RadzenCard>
+    );
+
+       void ShowNotification(TipoMensaje tipoMensaje)
+       {
+           switch (tipoMensaje)
+           {
+               case TipoMensaje.Exito: // exito
+                   ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success Summary", Detail = "Exito al Eliminar Registro", Duration = 2000 });
+                   break;
+               case TipoMensaje.Error://error
+                   ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Error, Summary = "Error Summary", Detail = "Error al borrar registro", Duration = 2000 });
+                   break;
+               case TipoMensaje.Info://info
+                   ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Info, Summary = "Info", Detail = "No se borro nada", Duration = 2000 });
+                   break;
+           }
+       }
+
+       async Task ShowNotification(NotificationMessage message)
+       {
+           notificationService.Notify(message);
+       }
+}
