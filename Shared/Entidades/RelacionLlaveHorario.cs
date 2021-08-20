@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace RIEGO.Shared.Entidades
 {
-    public class RelacionLLaveSeccion
+    public class RelacionLlaveHorario
     {
         public int Id { get; set; }
         public int IdLlave { get; set; }
-        public int IdSeccion { get; set; }
+        public int IdHorario { get; set; }
         public bool Activo { get; set; }
     }
 }

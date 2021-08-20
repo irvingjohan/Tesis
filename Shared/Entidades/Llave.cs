@@ -10,11 +10,17 @@ namespace RIEGO.Shared.Entidades
     public class Llave
     {
         public int Id { get; set; }
-        [Required(ErrorMessage = "El campo {0} es requerido")]
-        public string Mac { get; set; }
-        [Required(ErrorMessage = "El campo {0} es requerido")]
-        public string Ip { get; set; }
+        public int IdTablilla { get; set; }
 
-        public bool Activo { get; set; }
+        public string Descripcion { get; set; }
+
+        public bool Estatus { get; set; }
+
+    //    [Required(ErrorMessage = "El campo {0} es requerido")]
+    //    public string Mac { get; set; }
+    //    [Required(ErrorMessage = "El campo {0} es requerido")]
+    //    public string Ip { get; set; }
+
+    //    public bool Activo { get; set; }
     }
 }

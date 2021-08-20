@@ -1,0 +1,96 @@
+﻿@inject IRepositorio repositorio
+
+<EditForm Model="Llave" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-group">
+        <div>
+            <label><strong style="color:red">*</strong> Indica un campo obligatorio</label>
+        </div>
+        <label>Tablilla: <strong style="color:red">*</strong></label>
+        <div>
+
+            @if (EsAdmin)
+            {
+                @if (SoloActivos)
+                {
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Data="@TablillaNoSeleccionada.Where(x => x.Activo == true)" @bind-Value="Llave.IdTablilla" TextProperty="Descripcion" ValueProperty="Id" Style="margin-bottom: 20px; width:400px;" Change="@(args => ChangeBound(args, "DropDown with bound Value"))" />
+                }
+                else
+                {
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Data="@TablillaNoSeleccionada" @bind-Value="Llave.IdTablilla" TextProperty="Descripcion" ValueProperty="Id" Style="margin-bottom: 20px; width:400px;" Change="@(args => ChangeBound(args, "DropDown with bound Value"))" />
+                }
+            }
+            else
+            {
+                @if (SoloActivos)
+                {
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Data="@TablillaNoSeleccionada.Where(x => x.Activo == true && x.Id == _IdEmpresa)" @bind-Value="Llave.IdTablilla" TextProperty="Descripcion" ValueProperty="Id" Style="margin-bottom: 20px; width:400px;" Change="@(args => ChangeBound(args, "DropDown with bound Value"))" />
+                }
+                else
+                {
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Data="@TablillaNoSeleccionada.Where(x => x.Id == _IdEmpresa)" @bind-Value="Llave.IdTablilla" TextProperty="Descripcion" ValueProperty="Id" Style="margin-bottom: 20px; width:400px;" Change="@(args => ChangeBound(args, "DropDown with bound Value"))" />
+                }
+            }
+            <ValidationMessage For="@(() =>Llave.IdTablilla)" />
+        </div>
+
+        <label>Descripcion Llave: <strong style="color:red">*</strong></label>
+        <div>
+            <InputText class="form-control" @bind-Value="@Llave.Descripcion" maxlength="75" oninput="this.value = this.value.toUpperCase()" />
+            <ValidationMessage For="@(() =>Llave.Descripcion)" />
+        </div>
+    </div>
+    @if (Llave.IdTablilla > 0 && (Llave.Descripcion != "" && Llave.Descripcion != null))
+    {
+        <button class="btn btn-success" type="submit">Guardar Cambios</button>
+    }
+    else
+    {
+        <button class="btn btn-success" type="submit" disabled>Guardar Cambios</button>
+    }
+</EditForm>
+@code
+{
+    private List<Tablilla> TablillaNoSeleccionada = new List<Tablilla>();
+    [Parameter] public Llave Llave { get; set; }
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public bool IsCreatingPage { get; set; }
+    [Parameter] public int IdTablilla { get; set; }
+    [Parameter] public int IdLlave { get; set; }
+    [Parameter] public bool EsAdmin { get; set; }
+    [Parameter] public int IdEmpresa { get; set; }
+    [Parameter] public int IdSucursal { get; set; }
+    public int _IdEmpresa;
+    public int _IdSucursal;
+    public bool _EsAdmin;
+    public bool SoloActivos = true;
+
+    protected async override Task OnInitializedAsync()
+    {
+        if (IdLlave > 0)
+            _IdEmpresa = IdLlave;
+
+        if (IdLlave > 0)
+            _IdSucursal = IdLlave;
+
+        if (IdLlave > 0 && IdLlave > 0)
+            _EsAdmin = EsAdmin;
+
+        var responseHttp = await repositorio.Get<List<Tablilla>>("api/Tablilla");
+        TablillaNoSeleccionada = responseHttp.Response;
+
+        var isCreatingPage = IsCreatingPage;
+
+        if (isCreatingPage)
+        {
+            // Llave.Activo = true;
+        }
+    }
+
+    void ChangeBound(object value, string name)
+    {
+        if (Llave.Id > 0)
+            IdTablilla = Llave.IdTablilla;
+        StateHasChanged();
+    }
+}

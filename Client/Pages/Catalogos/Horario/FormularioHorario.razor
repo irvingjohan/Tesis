@@ -1,0 +1,142 @@
+﻿@inject IRepositorio repositorio
+
+<EditForm Model="Horario" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-group">
+        <div>
+            <label><strong style="color:red">*</strong> Indica un campo obligatorio</label>
+        </div>
+        @*@if (useRolCBO)
+        {
+            <label>Rol: <strong style="color:red">*</strong> </label>
+            <div>
+                @if (SoloActivos)
+                {
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Data="@RolNoSeleccionada.Where(x => x.Activo == true)" @bind-Value="Horarios.IdRol" TextProperty="Descripcion" ValueProperty="Id" Style="margin-bottom: 20px; width:400px;" Change="@(args => ChangeBoundRol(args, "DropDown with bound Value"))" />
+                }
+                else
+                {
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Data="@RolNoSeleccionada" @bind-Value="Horarios.IdRol" TextProperty="Descripcion" ValueProperty="Id" Style="margin-bottom: 20px; width:400px;" Change="@(args => ChangeBoundRol(args, "DropDown with bound Value"))" />
+                }
+                <ValidationMessage For="@(() => Horarios.IdRol)" />
+            </div>
+        }*@
+        <label>Dia:</label>
+        <RadzenTextBox Disabled="true" Style="width:300px" @bind-Value="@TextoPermiso" />
+
+        <label>Hora Inicio</label>
+        <RadzenDatePicker Value="@Horario.HoraInicio" TValue="DateTime?" ShowTime="true" TimeOnly="true" DateFormat="HH:mm" Change=@(args => OnChangeHoraInicio(args, "Time-only DatePicker", "HH:mm")) />
+        
+        <label>Hora Fin</label>
+        <RadzenDatePicker  Value="@Horario.HoraFin" TValue="DateTime?" ShowTime="true" TimeOnly="true" DateFormat="HH:mm" Change=@(args => OnChangeHoraFin(args, "Time-only DatePicker", "HH:mm")) />
+       
+        <label>Activo:</label>
+        @*@if (IsCreatingPage)
+        {*@
+            <RadzenSwitch @bind-Value="@Horario.Activo" Style="margin-bottom: 20px" Disabled="true" />
+        @*}
+        else
+        {
+            <RadzenSwitch @bind-Value="@Horario.Activo" Style="margin-bottom: 20px" />
+        }*@
+    </div>
+</EditForm>
+@code
+{
+    [Parameter] public Horario Horario { get; set; }
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public bool IsCreatingPage { get; set; }
+    [Parameter] public string TextoPermiso { get; set; }
+    [Parameter] public string Dia { get; set; }
+    private List<Horario> RolNoSeleccionada = new List<Horario>();
+    [Parameter] public bool useRolCBO { get; set; }
+    [Parameter] public int _idAgrupador { get; set; }
+    [Parameter] public string HoraInicio { get; set; }
+    [Parameter] public string HoraFin { get; set; }
+    int IdRol;
+    public bool SoloActivos = true;
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        var responseHttp = await repositorio.Get<List<Horario>>("api/Horario");
+        RolNoSeleccionada = responseHttp.Response;
+        if (IsCreatingPage)
+        {
+            if (RolNoSeleccionada.Count == 0)
+            {
+                _idAgrupador = 1;
+            }
+            else
+            {
+                _idAgrupador = RolNoSeleccionada.Select(x => x.Agrupador).LastOrDefault();
+                _idAgrupador++;
+            }
+
+            Horario.Agrupador = _idAgrupador;
+        }
+        else
+        {
+            //Horario.HoraInicio = ConstruyeFecha(HoraInicio);
+            //Horario.HoraFin = ConstruyeFecha(HoraFin);
+        }
+
+    }
+
+    protected override void OnParametersSet()
+    {
+        //Permisos.Descripcion = TextoPermiso;
+        @*@if (!useRolCBO)
+            Permisos.IdRol = _idRol;*@
+    var isCreatingPage = IsCreatingPage;
+
+    if (isCreatingPage)
+    {
+        Horario.Dia = TextoPermiso;
+
+
+
+        Horario.Activo = true;
+    }
+}
+
+DateTime ConstruyeFecha(string horaParm)
+{
+    var horaDescompuesta = horaParm.Split(":");
+    int hora = int.Parse(horaDescompuesta[0]);
+    int minutos = int.Parse(horaDescompuesta[1]);
+
+    var date1 = new DateTime(0001, 1, 1, hora, minutos, 00);
+    return date1;
+}
+
+void OnChangeHoraInicio(DateTime? value, string name, string format)
+{
+    //console.Log($"{name} value changed to {value?.ToString(format)}");
+    if (value.HasValue)
+    {
+        HoraInicio = value.Value.TimeOfDay.ToString();
+        Horario.HoraInicio = ConstruyeFecha(HoraInicio);
+    }
+    else
+    {
+        HoraInicio = null;
+        Horario.HoraInicio = DateTime.MinValue;
+    }
+}
+
+void OnChangeHoraFin(DateTime? value, string name, string format)
+{
+    //console.Log($"{name} value changed to {value?.ToString(format)}");
+    if (value.HasValue)
+    {
+        HoraFin = value.Value.TimeOfDay.ToString();
+        Horario.HoraFin = ConstruyeFecha(HoraFin);
+    }
+    else
+    {
+        HoraFin = null;
+        Horario.HoraFin = DateTime.MinValue;
+    }
+}
+}

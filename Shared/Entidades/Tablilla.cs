@@ -7,16 +7,15 @@ using System.Threading.Tasks;
 
 namespace RIEGO.Shared.Entidades
 {
-    public class Horario
+    public class Tablilla
     {
         public int Id { get; set; }
         [Required(ErrorMessage = "El campo {0} es requerido")]
-        public string Dia { get; set; }
+        public string Mac { get; set; }
         [Required(ErrorMessage = "El campo {0} es requerido")]
-        public DateTime HoraInicio { get; set; }
-        public DateTime HoraFin { get; set; }
-        public int Agrupador { get; set; }
-        public bool Activo { get; set; }
+        public string Ip { get; set; }
 
+        public string Descripcion { get; set; }
+        public bool Activo { get; set; }
     }
 }

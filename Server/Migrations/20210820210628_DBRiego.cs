@@ -14,9 +14,9 @@ namespace RIEGO.Server.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Dia = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IdSeccion = table.Column<int>(type: "int", nullable: false),
                     HoraInicio = table.Column<DateTime>(type: "datetime2", nullable: false),
                     HoraFin = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Agrupador = table.Column<int>(type: "int", nullable: false),
                     Activo = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -30,9 +30,9 @@ namespace RIEGO.Server.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Mac = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Ip = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Activo = table.Column<bool>(type: "bit", nullable: false)
+                    IdTablilla = table.Column<int>(type: "int", nullable: false),
+                    Descripcion = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Estatus = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -40,18 +40,18 @@ namespace RIEGO.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RelacionLLaveSeccion",
+                name: "RelacionLlaveHorario",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IdLlave = table.Column<int>(type: "int", nullable: false),
-                    IdSeccion = table.Column<int>(type: "int", nullable: false),
+                    IdHorario = table.Column<int>(type: "int", nullable: false),
                     Activo = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RelacionLLaveSeccion", x => x.Id);
+                    table.PrimaryKey("PK_RelacionLlaveHorario", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -60,7 +60,7 @@ namespace RIEGO.Server.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    IdRelacionLlaveSeccion = table.Column<int>(type: "int", nullable: false),
+                    IdRelacionLlaveHorario = table.Column<int>(type: "int", nullable: false),
                     Litros = table.Column<decimal>(type: "money", nullable: false),
                     FechaInicio = table.Column<DateTime>(type: "datetime2", nullable: false),
                     FechaFIN = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -97,6 +97,22 @@ namespace RIEGO.Server.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Seccion", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tablilla",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Mac = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Ip = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Descripcion = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Activo = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tablilla", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -174,13 +190,16 @@ namespace RIEGO.Server.Migrations
                 name: "Permisos");
 
             migrationBuilder.DropTable(
-                name: "RelacionLLaveSeccion");
+                name: "RelacionLlaveHorario");
 
             migrationBuilder.DropTable(
                 name: "Riego");
 
             migrationBuilder.DropTable(
                 name: "Seccion");
+
+            migrationBuilder.DropTable(
+                name: "Tablilla");
 
             migrationBuilder.DropTable(
                 name: "Usuario");

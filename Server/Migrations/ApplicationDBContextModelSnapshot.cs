@@ -15,19 +15,22 @@ namespace RIEGO.Server.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .UseIdentityColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.1");
+                .HasAnnotation("ProductVersion", "5.0.8")
+                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("RIEGO.Shared.Entidades.Horario", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .UseIdentityColumn();
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<bool>("Activo")
                         .HasColumnType("bit");
+
+                    b.Property<int>("Agrupador")
+                        .HasColumnType("int");
 
                     b.Property<string>("Dia")
                         .IsRequired()
@@ -39,9 +42,6 @@ namespace RIEGO.Server.Migrations
                     b.Property<DateTime>("HoraInicio")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("IdSeccion")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.ToTable("Horario");
@@ -52,18 +52,16 @@ namespace RIEGO.Server.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .UseIdentityColumn();
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<bool>("Activo")
+                    b.Property<string>("Descripcion")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Estatus")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Ip")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Mac")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("IdTablilla")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -75,7 +73,7 @@ namespace RIEGO.Server.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .UseIdentityColumn();
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<bool>("Activo")
                         .HasColumnType("bit");
@@ -100,25 +98,25 @@ namespace RIEGO.Server.Migrations
                     b.ToTable("Permisos");
                 });
 
-            modelBuilder.Entity("RIEGO.Shared.Entidades.RelacionLLaveSeccion", b =>
+            modelBuilder.Entity("RIEGO.Shared.Entidades.RelacionLlaveHorario", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .UseIdentityColumn();
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<bool>("Activo")
                         .HasColumnType("bit");
 
-                    b.Property<int>("IdLlave")
+                    b.Property<int>("IdHorario")
                         .HasColumnType("int");
 
-                    b.Property<int>("IdSeccion")
+                    b.Property<int>("IdLlave")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.ToTable("RelacionLLaveSeccion");
+                    b.ToTable("RelacionLlaveHorario");
                 });
 
             modelBuilder.Entity("RIEGO.Shared.Entidades.Riego", b =>
@@ -126,7 +124,7 @@ namespace RIEGO.Server.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .UseIdentityColumn();
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<bool>("Activo")
                         .HasColumnType("bit");
@@ -137,7 +135,7 @@ namespace RIEGO.Server.Migrations
                     b.Property<DateTime>("FechaInicio")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("IdRelacionLlaveSeccion")
+                    b.Property<int>("IdRelacionLlaveHorario")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Litros")
@@ -153,7 +151,7 @@ namespace RIEGO.Server.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .UseIdentityColumn();
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<bool>("Activo")
                         .HasColumnType("bit");
@@ -172,7 +170,7 @@ namespace RIEGO.Server.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .UseIdentityColumn();
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<bool>("Activo")
                         .HasColumnType("bit");
@@ -186,12 +184,38 @@ namespace RIEGO.Server.Migrations
                     b.ToTable("Seccion");
                 });
 
+            modelBuilder.Entity("RIEGO.Shared.Entidades.Tablilla", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Descripcion")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Ip")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Mac")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tablilla");
+                });
+
             modelBuilder.Entity("RIEGO.Shared.Entidades.Usuario", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .UseIdentityColumn();
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<bool>("Activo")
                         .HasColumnType("bit");

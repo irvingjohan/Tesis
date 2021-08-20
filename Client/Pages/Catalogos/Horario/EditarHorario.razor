@@ -1,0 +1,271 @@
+﻿@page "/Horario/Editar/{HorarioId:int}"
+@inject IRepositorio repositorio
+@inject NavigationManager navigationManager
+@inject DialogService dialogService
+@inject NotificationService notificationService
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@*Login*@
+@attribute [Authorize]
+@inject CustomAuthenticationStateProvider Auth
+@inject HttpClient Http
+@*Login*@
+
+<AuthorizeView>
+    <Authorized>
+        <h3>Editar Permisos</h3>
+        <br />
+        @if (Horario == null)
+        {
+            <text>Cargando...</text>
+        }
+        else
+        {
+            @if (_esAdmin || _borrarUsuarios || _editarUsuarios)
+            {
+                <FormularioHorario OnValidSubmit="Editar" Horario="listHorario[0]" IsCreatingPage="false" TextoPermiso="Lunes"     HoraInicio="@listHorario[0].HoraInicio.ToShortTimeString()" HoraFin="@listHorario[0].HoraFin.ToShortTimeString()" _idAgrupador="HorarioId" />
+                <FormularioHorario OnValidSubmit="Editar" Horario="listHorario[1]" IsCreatingPage="false" TextoPermiso="Martes"    HoraInicio="@listHorario[1].HoraInicio.ToShortTimeString()" HoraFin="@listHorario[1].HoraFin.ToShortTimeString()" _idAgrupador="listHorario[0].Agrupador" />
+                <FormularioHorario OnValidSubmit="Editar" Horario="listHorario[2]" IsCreatingPage="false" TextoPermiso="Miercoles" HoraInicio="@listHorario[2].HoraInicio.ToShortTimeString()" HoraFin="@listHorario[2].HoraFin.ToShortTimeString()" _idAgrupador="listHorario[0].Agrupador" />
+                <FormularioHorario OnValidSubmit="Editar" Horario="listHorario[3]" IsCreatingPage="false" TextoPermiso="Jueves"    HoraInicio="@listHorario[3].HoraInicio.ToShortTimeString()" HoraFin="@listHorario[3].HoraFin.ToShortTimeString()" _idAgrupador="listHorario[0].Agrupador" />
+                <FormularioHorario OnValidSubmit="Editar" Horario="listHorario[4]" IsCreatingPage="false" TextoPermiso="Viernes"   HoraInicio="@listHorario[4].HoraInicio.ToShortTimeString()" HoraFin="@listHorario[4].HoraFin.ToShortTimeString()" _idAgrupador="listHorario[0].Agrupador" />
+                <FormularioHorario OnValidSubmit="Editar" Horario="listHorario[5]" IsCreatingPage="false" TextoPermiso="Sabado"    HoraInicio="@listHorario[5].HoraInicio.ToShortTimeString()" HoraFin="@listHorario[5].HoraFin.ToShortTimeString()" _idAgrupador="listHorario[0].Agrupador" />
+                <FormularioHorario OnValidSubmit="Editar" Horario="listHorario[6]" IsCreatingPage="false" TextoPermiso="Domingo"   HoraInicio="@listHorario[6].HoraInicio.ToShortTimeString()" HoraFin="@listHorario[6].HoraFin.ToShortTimeString()" _idAgrupador="listHorario[0].Agrupador" />
+
+                @*<FormularioPermisos OnValidSubmit="Editar" Permisos="listPermisos[0]" IsCreatingPage="true" TextoPermiso="Ver" useRolCBO="true" _idRol="PermisoId" />
+                <FormularioPermisos OnValidSubmit="Editar" Permisos="listPermisos[1]" IsCreatingPage="true" TextoPermiso="Crear" useRolCBO="false" _idRol="listPermisos[0].IdRol" />
+                <FormularioPermisos OnValidSubmit="Editar" Permisos="listPermisos[2]" IsCreatingPage="true" TextoPermiso="Editar" useRolCBO="false" _idRol="listPermisos[0].IdRol" />
+                <FormularioPermisos OnValidSubmit="Editar" Permisos="listPermisos[3]" IsCreatingPage="true" TextoPermiso="Borrar" useRolCBO="false" _idRol="listPermisos[0].IdRol" />
+                <FormularioPermisos OnValidSubmit="Editar" Permisos="listPermisos[4]" IsCreatingPage="true" TextoPermiso="VerUsuarios" useRolCBO="false" _idRol="listPermisos[0].IdRol" />
+                <FormularioPermisos OnValidSubmit="Editar" Permisos="listPermisos[5]" IsCreatingPage="true" TextoPermiso="CrearUsuarios" useRolCBO="false" _idRol="listPermisos[0].IdRol" />
+                <FormularioPermisos OnValidSubmit="Editar" Permisos="listPermisos[6]" IsCreatingPage="true" TextoPermiso="EditarUsuarios" useRolCBO="false" _idRol="listPermisos[0].IdRol" />
+                <FormularioPermisos OnValidSubmit="Editar" Permisos="listPermisos[7]" IsCreatingPage="true" TextoPermiso="BorrarUsuarios" useRolCBO="false" _idRol="listPermisos[0].IdRol" />
+                <FormularioPermisos OnValidSubmit="Editar" Permisos="listPermisos[8]" IsCreatingPage="true" TextoPermiso="VerReportes" useRolCBO="false" _idRol="listPermisos[0].IdRol" />*@
+                <button class="btn btn-success" type="submit" @onclick="Editar">Guardar Cambios</button>
+            }
+            else if (!_esAdmin || !_borrarUsuarios || !_editarUsuarios)
+            {
+                <text>No tiene permisos suficientes para estar aquí...</text>
+            }
+        }
+    </Authorized>
+    <NotAuthorized>
+        <text> No tiene permisos suficientes para estar aquí...</text>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code
+{
+    [Parameter] public int HorarioId { get; set; }
+    Horario Horario;
+    IEnumerable<Horario> horario;
+    Horario[] listHorario = new Horario[7];
+    int _idAgrupador;
+    int i = 0;
+    bool finished;
+    BlazorCoockies blazorCoockies = new BlazorCoockies();
+    public enum TipoMensaje { None, Exito, Error, Info };
+    TipoMensaje tipoMensaje;
+    bool _esAdmin;
+    bool _editarUsuarios;
+    bool _borrarUsuarios;
+    int _idEmpresa;
+    int _idSucursal;
+    bool locked;
+
+    protected async override Task OnInitializedAsync()
+    {
+        var token = await Auth.GetTokenAsync();
+        if (!string.IsNullOrEmpty(token))
+        {
+            Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            await blazorCoockies.CoockieGetter(sessionStorage);
+            _esAdmin = Boolean.Parse(blazorCoockies.EsAdmin.ToString());
+            _editarUsuarios = Boolean.Parse(blazorCoockies.EditarUsuarios.ToString());
+            _borrarUsuarios = Boolean.Parse(blazorCoockies.BorrarUsuarios.ToString());
+            _idEmpresa = int.Parse(blazorCoockies.IDUserEmpresa);
+            _idSucursal = int.Parse(blazorCoockies.IDUserSucursal);
+            dialogService.OnOpen += Open;
+            dialogService.OnClose += Close;
+            var httpResponse = await repositorio.Get<List<Horario>>("api/Horario");
+            horario = httpResponse.Response;
+            _idAgrupador = horario.Where(x => x.Id == HorarioId).Select(x => x.Agrupador).FirstOrDefault();
+            var _listHorario= horario.Where(x => x.Agrupador == _idAgrupador).ToList();
+
+            foreach (var item in _listHorario)
+            {
+                listHorario[i] = item;
+                var pito = listHorario[i].HoraInicio.ToShortTimeString();
+                pito = pito;
+                i++;
+            }
+
+            var httpResponse2 = await repositorio.Get<Horario>($"api/Horario/{HorarioId}");
+            Horario = httpResponse2.Response;
+
+            if (httpResponse.Error)
+            {
+                if (httpResponse.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    navigationManager.NavigateTo("Horario");
+                }
+                else
+                {
+                }
+            }
+            else
+            {
+                Horario = httpResponse2.Response;
+            }
+        }
+    }
+
+    private async Task Editar2()
+    {
+        if (!locked)
+        {
+            locked = true;
+            var httpResponse = await repositorio.Put($"api/Horario/{HorarioId}", Horario);
+            if (httpResponse.Error)
+            {
+                ShowNotification(TipoMensaje.Error);
+                locked = false;
+            }
+            else
+            {
+                ShowNotification(TipoMensaje.Exito);
+                navigationManager.NavigateTo("Horario");
+                locked = false;
+            }
+        }
+    }
+
+    private async Task Editar()
+    {
+        if (!locked)
+        {
+            locked = true;
+            for (int i = 0; i <= 6; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        if (listHorario[i].HoraInicio == DateTime.MinValue && listHorario[i].HoraFin == DateTime.MinValue)
+                            listHorario[i].Activo = false;
+                        else
+                            listHorario[i].Activo = true;
+                        HorarioId = listHorario[i].Id;
+                        break;
+                    case 1:
+                        if (listHorario[i].HoraInicio == DateTime.MinValue && listHorario[i].HoraFin == DateTime.MinValue)
+                            listHorario[i].Activo = false;
+                        else
+                            listHorario[i].Activo = true;
+                        HorarioId = listHorario[i].Id;
+                        break;
+                    case 2:
+                        if (listHorario[i].HoraInicio == DateTime.MinValue && listHorario[i].HoraFin == DateTime.MinValue)
+                            listHorario[i].Activo = false;
+                        else
+                            listHorario[i].Activo = true;
+                        HorarioId = listHorario[i].Id;
+                        break;
+                    case 3:
+                        if (listHorario[i].HoraInicio == DateTime.MinValue && listHorario[i].HoraFin == DateTime.MinValue)
+                            listHorario[i].Activo = false;
+                        else
+                            listHorario[i].Activo = true;
+                        HorarioId = listHorario[i].Id;
+                        break;
+                    case 4:
+                        if (listHorario[i].HoraInicio == DateTime.MinValue && listHorario[i].HoraFin == DateTime.MinValue)
+                            listHorario[i].Activo = false;
+                        else
+                            listHorario[i].Activo = true;
+                        HorarioId = listHorario[i].Id;
+                        break;
+                    case 5:
+                        if (listHorario[i].HoraInicio == DateTime.MinValue && listHorario[i].HoraFin == DateTime.MinValue)
+                            listHorario[i].Activo = false;
+                        else
+                            listHorario[i].Activo = true;
+                        HorarioId = listHorario[i].Id;
+                        break;
+                    case 6:
+                        if (listHorario[i].HoraInicio == DateTime.MinValue && listHorario[i].HoraFin == DateTime.MinValue)
+                            listHorario[i].Activo = false;
+                        else
+                            listHorario[i].Activo = true;
+                        HorarioId = listHorario[i].Id;
+                        finished = true;
+                        break;
+                }
+
+                if (listHorario[0].Agrupador > 0) ////agregado
+                {
+                    var httpResponse = await repositorio.Put($"api/Horario/{HorarioId}", listHorario[i]);
+                    if (httpResponse.Error)
+                    {
+                        var body = await httpResponse.GetBody();
+                        locked = false;
+                    }
+                    else
+                    {
+                        if (finished)
+                        {
+                            finished = false;
+                            navigationManager.NavigateTo("Horario");
+                        }
+                        locked = false;
+                    }
+                }
+            }
+        }
+    }
+
+    void Open(string title, Type type, Dictionary<string, object> parameters, DialogOptions options)
+    {
+        StateHasChanged();
+    }
+
+    void Close(dynamic result)
+    {
+        if (result)
+        { }
+        else
+        {
+            ShowNotification(TipoMensaje.Info);
+        }
+    }
+
+    async Task ShowSimpleDialog() => await dialogService.OpenAsync("Simple Dialog", ds =>
+    @<RadzenCard Style="padding: 20px;">
+        <p Style="margin-bottom: 10px;">Confirm?</p>
+        <div class="row">
+            <div class="col-md-12">
+                <RadzenButton Text="Ok" Click="() =>  ds.Close(true)" Style="margin-bottom: 10px; width: 150px" />
+                <RadzenButton Text="Cancel" Click="()=> ds.Close(false)" ButtonStyle="ButtonStyle.Secondary" Style="margin-bottom: 10px; width: 150px" />
+            </div>
+        </div>
+    </RadzenCard>
+    );
+
+    void ShowNotification(TipoMensaje tipoMensaje)
+    {
+        switch (tipoMensaje)
+        {
+            case TipoMensaje.Exito: // exito
+                ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success Summary", Detail = "Exito al Editar Registro", Duration = 2000 });
+                break;
+            case TipoMensaje.Error://error
+                ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Error, Summary = "Error Summary", Detail = "Error al Editar Registro", Duration = 2000 });
+                break;
+            case TipoMensaje.Info://info
+                ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Info, Summary = "Info", Detail = "No se edito nada", Duration = 2000 });
+                break;
+        }
+    }
+
+    async Task ShowNotification(NotificationMessage message)
+    {
+        notificationService.Notify(message);
+    }
+}

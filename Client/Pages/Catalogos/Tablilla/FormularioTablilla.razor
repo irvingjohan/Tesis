@@ -1,0 +1,66 @@
+﻿<EditForm Model="Tablilla" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-group">
+        <label>Descripcion MAC:</label>
+        <div>
+            <InputText class="form-control" @bind-Value="@Tablilla.Mac" maxlength="100" oninput="this.value = this.value.toUpperCase()" />
+            <ValidationMessage For="@(() =>Tablilla.Mac)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Descripcion IP:</label>
+        <div>
+            <InputText class="form-control" @bind-Value="@Tablilla.Ip" maxlength="15" oninput="this.value = this.value.toUpperCase()" />
+            <ValidationMessage For="@(() =>Tablilla.Ip)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Descripcion:</label>
+        <div>
+            <InputText class="form-control" @bind-Value="@Tablilla.Descripcion" maxlength="10" oninput="this.value = this.value.toUpperCase()" />
+            <ValidationMessage For="@(() =>Tablilla.Descripcion)" />
+        </div>
+    </div>
+    <label>Activo:</label>
+    <div>
+        @if (IsCreatingPage)
+        {
+            <RadzenSwitch @bind-Value="@Tablilla.Activo" Style="margin-bottom: 20px" Disabled="true" />
+            <ValidationMessage For="@(() => Tablilla.Activo)" />
+        }
+        else
+        {
+            <RadzenSwitch @bind-Value="@Tablilla.Activo" Style="margin-bottom: 20px" />
+            <ValidationMessage For="@(() => Tablilla.Activo)" />
+        }
+    </div>
+    @if ((Tablilla.Mac != "" && Tablilla.Mac != null) && (Tablilla.Ip != "" && Tablilla.Ip != null))
+    {
+        <button class="btn btn-success" type="submit">Guardar Cambios</button>
+    }
+    else
+    {
+        <button class="btn btn-success" disabled type="submit">Guardar Cambios</button>
+    }
+</EditForm>
+
+@code
+{
+    [Parameter] public Tablilla Tablilla { get; set; }
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public bool IsCreatingPage { get; set; }
+    [Parameter] public int IdEmpresa { get; set; }
+    [Parameter] public int IdSucursal { get; set; }
+    [Parameter] public bool EsAdmin { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        //the param will be set now
+        var isCreatingPage = IsCreatingPage;
+
+        if (isCreatingPage)
+        {
+            Tablilla.Activo = true;
+        }
+    }
+}

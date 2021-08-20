@@ -10,7 +10,7 @@ namespace RIEGO.Shared.Entidades
     public class Riego
     {
         public int Id { get; set; }
-        public int IdRelacionLlaveSeccion { get; set; }
+        public int IdRelacionLlaveHorario { get; set; }
         [Column(TypeName = "money")]
         public decimal Litros { get; set; }
         public DateTime FechaInicio { get; set; }
