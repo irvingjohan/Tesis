@@ -1,0 +1,136 @@
+﻿@inject IRepositorio repositorio
+
+<EditForm Model="RelacionLlaveHorario" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-group">
+        <div>
+            <label><strong style="color:red">*</strong> Indica un campo obligatorio</label>
+        </div>
+        <label>Llave: <strong style="color:red">*</strong></label>
+        <div>
+
+            @if (EsAdmin)
+            {
+                @if (SoloActivos)
+                {
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Data="@LlaveNoSeleccionada" @bind-Value="RelacionLlaveHorario.IdLlave" TextProperty="Descripcion" ValueProperty="Id" Style="margin-bottom: 20px; width:400px;" Change="@(args => ChangeBound(args, "DropDown with bound Value"))" />
+                }
+                else
+                {
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Data="@LlaveNoSeleccionada" @bind-Value="RelacionLlaveHorario.IdLlave" TextProperty="Descripcion" ValueProperty="Id" Style="margin-bottom: 20px; width:400px;" Change="@(args => ChangeBound(args, "DropDown with bound Value"))" />
+                }
+            }
+            @*else
+            {
+                @if (SoloActivos)
+                {
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Data="@TablillaNoSeleccionada.Where(x => x.Activo == true && x.Id == _IdEmpresa)" @bind-Value="Llave.IdTablilla" TextProperty="Descripcion" ValueProperty="Id" Style="margin-bottom: 20px; width:400px;" Change="@(args => ChangeBound(args, "DropDown with bound Value"))" />
+                }
+                else
+                {
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Data="@TablillaNoSeleccionada.Where(x => x.Id == _IdEmpresa)" @bind-Value="Llave.IdTablilla" TextProperty="Descripcion" ValueProperty="Id" Style="margin-bottom: 20px; width:400px;" Change="@(args => ChangeBound(args, "DropDown with bound Value"))" />
+                }
+            }*@
+            <ValidationMessage For="@(() =>RelacionLlaveHorario.IdLlave)" />
+        </div>
+
+        <label>Horario <strong style="color:red">*</strong></label>
+        <div>
+            @if (EsAdmin)
+            {
+                @if (SoloActivos)
+                {
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" 
+                                    Data="@HorarioNoSeleccionado.Where(x => x.Id == x.Id && x.Activo == true)" 
+                                    @bind-Value="RelacionLlaveHorario.IdHorario" 
+                                    TextProperty="Descripcion"
+                                    ValueProperty="Id" 
+                                    Style="margin-bottom: 20px; width:400px;" 
+                                    Change="@(args => ChangeBound2(args, "DropDown with bound Value"))" />
+                }
+                else
+                {
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" 
+                                    Data="@HorarioNoSeleccionado.Where(x => x.Id == x.Id)" 
+                                    @bind-Value="RelacionLlaveHorario.IdHorario"  
+                                    TextProperty="Descripcion"
+                                    ValueProperty="Id" 
+                                    Style="margin-bottom: 20px; width:400px;" 
+                                    Change="@(args => ChangeBound2(args, "DropDown with bound Value"))" />
+                }
+            }
+            <ValidationMessage For="@(() =>RelacionLlaveHorario.IdHorario)" />
+        </div>
+    </div>
+    @if (RelacionLlaveHorario.IdLlave > 0)
+    {
+        <button class="btn btn-success" type="submit">Guardar Cambios</button>
+    }
+    else
+    {
+        <button class="btn btn-success" type="submit" disabled>Guardar Cambios</button>
+    }
+</EditForm>
+@code
+{
+    private List<Llave> LlaveNoSeleccionada = new List<Llave>();
+    private List<Horario> HorarioNoSeleccionado = new List<Horario>();
+
+    [Parameter] public RelacionLlaveHorario RelacionLlaveHorario { get; set; }
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public bool IsCreatingPage { get; set; }
+    [Parameter] public int IdTablilla { get; set; }
+    [Parameter] public int IdLlave { get; set; }
+    [Parameter] public bool EsAdmin { get; set; }
+    [Parameter] public int IdEmpresa { get; set; }
+    [Parameter] public int IdSucursal { get; set; }
+    public int _IdEmpresa;
+    public int _IdSucursal;
+    public bool _EsAdmin;
+    public bool SoloActivos = true;
+    List<string> HorarioList = new List<string>();
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        if (IdLlave > 0)
+            _IdEmpresa = IdLlave;
+
+        if (IdLlave > 0)
+            _IdSucursal = IdLlave;
+
+        if (IdLlave > 0 && IdLlave > 0)
+            _EsAdmin = EsAdmin;
+
+        var responseHttp = await repositorio.Get<List<Llave>>("api/Llave");
+        LlaveNoSeleccionada = responseHttp.Response;
+
+        var responseHttp2 = await repositorio.Get<List<Horario>>("api/Horario");
+        HorarioNoSeleccionado = responseHttp2.Response;
+
+        //var horario = HorarioNoSeleccionado.Where(x => x.Id == x.Id).Select(s => new { s.Dia, s.HoraInicio, s.HoraFin }).ToString();
+
+        var isCreatingPage = IsCreatingPage;
+
+        if (isCreatingPage)
+        {
+             RelacionLlaveHorario.Activo = true;
+
+        }
+    }
+
+    void ChangeBound(object value, string name)
+    {
+        if (RelacionLlaveHorario.Id > 0)
+            IdTablilla = RelacionLlaveHorario.IdLlave;
+        StateHasChanged();
+    }
+
+    void ChangeBound2(object value, string name)
+    {
+        //if (RelacionLlaveHorario.Id > 0)
+        //    IdTablilla = RelacionLlaveHorario.IdHorario;
+        StateHasChanged();
+    }
+}
+

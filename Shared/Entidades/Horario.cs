@@ -16,6 +16,7 @@ namespace RIEGO.Shared.Entidades
         public DateTime HoraInicio { get; set; }
         public DateTime HoraFin { get; set; }
         public int Agrupador { get; set; }
+        public string Descripcion { get; set; }
         public bool Activo { get; set; }
 
     }

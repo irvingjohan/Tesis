@@ -1,0 +1,158 @@
+﻿@page "/RelacionLlaveHorario/Editar/{RelacionLlaveHorarioId:int}"
+@inject IRepositorio repositorio
+@inject NavigationManager navigationManager
+@inject DialogService dialogService
+@implements IDisposable
+@inject NotificationService notificationService
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@*Login*@
+@attribute [Authorize]
+@inject CustomAuthenticationStateProvider Auth
+@inject HttpClient Http
+@*Login*@
+
+<AuthorizeView>
+    <Authorized>
+        <h3>Editar Asignar Horario</h3>
+        @if (!_esAdmin /*&& !_editar*/)
+        {
+            <text>No tiene permisos suficientes para estar aquí...</text>
+        }
+        else if (_esAdmin /*|| _editar*/)
+        {
+            @if (RelacionLlaveHorario == null)
+            {
+                <text>Cargando...</text>
+            }
+            else
+            {
+                <FormularioRelacionLlaveHorario OnValidSubmit="Editar" RelacionLlaveHorario="RelacionLlaveHorario" IsCreatingPage="false" EsAdmin=_esAdmin IdEmpresa="_idEmpresa" IdSucursal="_idSucursal" />
+            }
+        }
+    </Authorized>
+    <NotAuthorized>
+        <text> No tiene permisos suficientes para estar aquí...</text>
+    </NotAuthorized>
+</AuthorizeView>
+@code
+{
+    [Parameter] public int RelacionLlaveHorarioId { get; set; }
+    RelacionLlaveHorario RelacionLlaveHorario;
+    BlazorCoockies blazorCoockies = new BlazorCoockies();
+    public enum TipoMensaje { None, Exito, Error, Info };
+    TipoMensaje tipoMensaje;
+    bool _esAdmin;
+    bool _editar;
+    int _idEmpresa;
+    int _idSucursal;
+    bool locked;
+
+    public void Dispose()
+    {
+        dialogService.OnOpen -= Open;
+        dialogService.OnClose -= Close;
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        dialogService.Dispose();
+        var token = await Auth.GetTokenAsync();
+        if (!string.IsNullOrEmpty(token))
+        {
+            Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            await blazorCoockies.CoockieGetter(sessionStorage);
+            _esAdmin = Boolean.Parse(blazorCoockies.EsAdmin.ToString());
+            _editar = Boolean.Parse(blazorCoockies.Editar.ToString());
+            _idEmpresa = int.Parse(blazorCoockies.IDUserEmpresa);
+            _idSucursal = int.Parse(blazorCoockies.IDUserSucursal);
+            dialogService.OnOpen += Open;
+            dialogService.OnClose += Close;
+            var httpResponse = await repositorio.Get<RelacionLlaveHorario>($"api/RelacionLlaveHorario/{RelacionLlaveHorarioId}");
+
+            if (httpResponse.Error)
+            {
+                if (httpResponse.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    navigationManager.NavigateTo("RelacionLlaveHorario");
+                }
+                else
+                {
+                }
+            }
+            else
+            {
+                RelacionLlaveHorario = httpResponse.Response;
+            }
+        }
+    }
+
+    private async Task Editar()
+    {
+        if (!locked)
+        {
+            locked = true;
+            var httpResponse = await repositorio.Put($"api/RelacionLlaveHorario/{RelacionLlaveHorarioId}", RelacionLlaveHorario);
+            if (httpResponse.Error)
+            {
+                ShowNotification(TipoMensaje.Error);
+                locked = false;
+            }
+            else
+            {
+                ShowNotification(TipoMensaje.Exito);
+                navigationManager.NavigateTo("RelacionLlaveHorario");
+                locked = false;
+            }
+        }
+    }
+
+    void Open(string title, Type type, Dictionary<string, object> parameters, DialogOptions options)
+    {
+        StateHasChanged();
+    }
+
+    void Close(dynamic result)
+    {
+        if (result)
+        {
+            //RunSync();
+        }
+        else
+        {
+            ShowNotification(TipoMensaje.Info);
+        }
+    }
+
+    async Task ShowSimpleDialog() => await dialogService.OpenAsync("Simple Dialog", ds =>
+    @<RadzenCard Style="padding: 20px;">
+        <p Style="margin-bottom: 10px;">Confirm?</p>
+        <div class="row">
+            <div class="col-md-12">
+                <RadzenButton Text="Ok" Click="() =>  ds.Close(true)" Style="margin-bottom: 10px; width: 150px" />
+                <RadzenButton Text="Cancel" Click="()=> ds.Close(false)" ButtonStyle="ButtonStyle.Secondary" Style="margin-bottom: 10px; width: 150px" />
+            </div>
+        </div>
+    </RadzenCard>
+    );
+
+    void ShowNotification(TipoMensaje tipoMensaje)
+    {
+        switch (tipoMensaje)
+        {
+            case TipoMensaje.Exito: // exito
+                ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success Summary", Detail = "Exito al Editar Registro", Duration = 2000 });
+                break;
+            case TipoMensaje.Error://error
+                ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Error, Summary = "Error Summary", Detail = "Error al Editar Registro", Duration = 2000 });
+                break;
+            case TipoMensaje.Info://info
+                ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Info, Summary = "Info", Detail = "No se edito nada", Duration = 2000 });
+                break;
+        }
+    }
+
+    async Task ShowNotification(NotificationMessage message)
+    {
+        notificationService.Notify(message);
+    }
+}
