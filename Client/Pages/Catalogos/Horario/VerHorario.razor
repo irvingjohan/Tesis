@@ -28,7 +28,7 @@
             if (_esAdmin || _crear || _borrar || _editar || _ver)
             {
                 //if (_esAdmin || _crearUsuarios || _borrarUsuarios || _editarUsuarios)
-                if (_esAdmin || _crear|| _borrar|| _editar)
+                if (_esAdmin || _crear || _borrar || _editar)
                 {
                     <div class="form-group">
                         <a class="btn btn-info" href="/Horario/Crear">Agregar Horario</a>
@@ -56,18 +56,7 @@
             </Template>
         </RadzenGridColumn>*@
                         <RadzenGridColumn TItem="Horario" Property="Agrupador" Title="Agrupador" />
-                        <RadzenGridColumn TItem="Horario" Property="Dia" Title="Dia" />
-                        <RadzenGridColumn TItem="Horario" Property="HoraInicio" Title="Hora Incio">
-                            <Template Context="data">
-                                @data.HoraInicio.TimeOfDay
-
-                            </Template>
-                        </RadzenGridColumn>
-                        <RadzenGridColumn TItem="Horario" Property="HoraFin" Title="Hora Fin">
-                            <Template Context="data">
-                                @data.HoraFin.TimeOfDay
-                            </Template>
-                        </RadzenGridColumn>
+                        <RadzenGridColumn TItem="Horario" Property="Descripcion" Title="Horario" />
                         <RadzenGridColumn TItem="Horario" Property="Activo" Title="Activo">
                             <Template Context="data">
                                 @if (@data.Activo)
@@ -160,7 +149,10 @@
         {
             var httpResponse = await repositorio.Get<List<Horario>>("api/Horario");
             horario = httpResponse.Response;
-            horario.Select(x => x.Activo = true).ToList();
+            horario = horario.Where(x => x.Activo == true).ToList();
+            ////////////var h  = httpResponse.Response;
+            ////////////h = h.Where(x => x.Id == 0).ToList();
+            ////////////horario = h;
             //var httpResponse2 = await repositorio.Get<List<Roles>>("api/Roles");
             //rol = httpResponse2.Response;
         }

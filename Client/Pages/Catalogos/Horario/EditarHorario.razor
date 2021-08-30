@@ -12,7 +12,7 @@
 
 <AuthorizeView>
     <Authorized>
-        <h3>Editar Permisos</h3>
+        <h3>Editar Horarios</h3>
         <br />
         @if (Horario == null)
         {
@@ -152,6 +152,7 @@
                             listHorario[i].Activo = false;
                         else
                             listHorario[i].Activo = true;
+                        listHorario[i].Descripcion = listHorario[i].Dia + "  " + listHorario[i].HoraInicio.ToString("hh:mm tt") + "  -  " + listHorario[i].HoraFin.ToString("hh:mm tt");
                         HorarioId = listHorario[i].Id;
                         break;
                     case 1:
@@ -159,6 +160,7 @@
                             listHorario[i].Activo = false;
                         else
                             listHorario[i].Activo = true;
+                        listHorario[i].Descripcion = listHorario[i].Dia + "  " + listHorario[i].HoraInicio.ToString("hh:mm tt") + "  -  " + listHorario[i].HoraFin.ToString("hh:mm tt");
                         HorarioId = listHorario[i].Id;
                         break;
                     case 2:
@@ -166,6 +168,7 @@
                             listHorario[i].Activo = false;
                         else
                             listHorario[i].Activo = true;
+                        listHorario[i].Descripcion = listHorario[i].Dia + "  " + listHorario[i].HoraInicio.ToString("hh:mm tt") + "  -  " + listHorario[i].HoraFin.ToString("hh:mm tt");
                         HorarioId = listHorario[i].Id;
                         break;
                     case 3:
@@ -173,6 +176,7 @@
                             listHorario[i].Activo = false;
                         else
                             listHorario[i].Activo = true;
+                        listHorario[i].Descripcion = listHorario[i].Dia + "  " + listHorario[i].HoraInicio.ToString("hh:mm tt") + "  -  " + listHorario[i].HoraFin.ToString("hh:mm tt");
                         HorarioId = listHorario[i].Id;
                         break;
                     case 4:
@@ -180,6 +184,7 @@
                             listHorario[i].Activo = false;
                         else
                             listHorario[i].Activo = true;
+                        listHorario[i].Descripcion = listHorario[i].Dia + "  " + listHorario[i].HoraInicio.ToString("hh:mm tt") + "  -  " + listHorario[i].HoraFin.ToString("hh:mm tt");
                         HorarioId = listHorario[i].Id;
                         break;
                     case 5:
@@ -187,6 +192,7 @@
                             listHorario[i].Activo = false;
                         else
                             listHorario[i].Activo = true;
+                        listHorario[i].Descripcion = listHorario[i].Dia + "  " + listHorario[i].HoraInicio.ToString("hh:mm tt") + "  -  " + listHorario[i].HoraFin.ToString("hh:mm tt");
                         HorarioId = listHorario[i].Id;
                         break;
                     case 6:
@@ -194,6 +200,7 @@
                             listHorario[i].Activo = false;
                         else
                             listHorario[i].Activo = true;
+                        listHorario[i].Descripcion = listHorario[i].Dia + "  " + listHorario[i].HoraInicio.ToString("hh:mm tt") + "  -  " + listHorario[i].HoraFin.ToString("hh:mm tt");
                         HorarioId = listHorario[i].Id;
                         finished = true;
                         break;
@@ -209,6 +216,11 @@
                     }
                     else
                     {
+                        if (i == 6)
+                        {
+                            finished = true;
+                        }
+
                         if (finished)
                         {
                             finished = false;

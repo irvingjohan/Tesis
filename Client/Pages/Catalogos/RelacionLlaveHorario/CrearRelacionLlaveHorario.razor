@@ -13,7 +13,7 @@
 
 <AuthorizeView>
     <Authorized>
-        <h3>Asignar Horario</h3>
+        <h3>Crear Asignacion de horarios</h3>
         @if (_esAdmin /*|| _crear || _borrar || _editar*/)
         {
             <FormularioRelacionLlaveHorario OnValidSubmit="Crear" RelacionLlaveHorario="relacionLlaveHorario" IsCreatingPage="true" EsAdmin=_esAdmin IdEmpresa="_idEmpresa" IdSucursal="_idSucursal" />

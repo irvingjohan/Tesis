@@ -13,7 +13,7 @@
 
 <AuthorizeView>
     <Authorized>
-        <h3>Crear Permisos</h3>
+        <h3>Crear Horario</h3>
         <br />
         @if (_esAdmin || _crearUsuarios || _borrarUsuarios || _editarUsuarios)
         {
@@ -176,6 +176,11 @@
                 }
                 else
                 {
+                    if ( i == 6 )
+                    {
+                        finished = true;
+                    }
+
                     if (finished)
                     {
                         ShowNotification(TipoMensaje.Exito);
